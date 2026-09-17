@@ -1,0 +1,8 @@
+[
+  {"file":"01-auto-approve.pdf","invoice_number":"INV-1001","supplier_name":"Northwind Office Ltd","purchase_order":"PO-4401","subtotal":350.00,"tax":70.00,"invoice_total":420.00,"expected_route":"auto_approve"},
+  {"file":"02-manager-approval.pdf","invoice_number":"INV-1002","supplier_name":"Contoso Facilities Ltd","purchase_order":"PO-4402","subtotal":1000.00,"tax":200.00,"invoice_total":1200.00,"expected_route":"manager_approval"},
+  {"file":"03-high-value.pdf","invoice_number":"INV-1003","supplier_name":"Fabrikam Technology Ltd","purchase_order":"PO-4403","subtotal":6250.00,"tax":1250.00,"invoice_total":7500.00,"expected_route":"manager_then_finance_approval"},
+  {"file":"04-duplicate-original.pdf","invoice_number":"INV-1004","supplier_name":"Adventure Works Services","purchase_order":"PO-4404","subtotal":250.00,"tax":50.00,"invoice_total":300.00,"expected_route":"auto_approve"},
+  {"file":"05-duplicate-copy.pdf","invoice_number":"INV-1004","supplier_name":"Adventure Works Services","purchase_order":"PO-4404","subtotal":250.00,"tax":50.00,"invoice_total":300.00,"expected_route":"stop_as_duplicate"},
+  {"file":"06-missing-invoice-number.pdf","invoice_number":null,"supplier_name":"Tailspin Supplies Ltd","purchase_order":"PO-4405","subtotal":700.00,"tax":140.00,"invoice_total":840.00,"expected_route":"manual_review"}
+]

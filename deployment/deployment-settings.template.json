@@ -1,0 +1,14 @@
+{
+  "EnvironmentVariables": [
+    {"SchemaName":"cyg_SharePointSiteUrl","Value":"https://YOURTENANT.sharepoint.com/sites/FinanceAutomation"},
+    {"SchemaName":"cyg_InvoiceLibraryName","Value":"Invoices"},
+    {"SchemaName":"cyg_ManagerApproverEmail","Value":"manager@example.com"},
+    {"SchemaName":"cyg_FinanceApproverEmail","Value":"finance@example.com"},
+    {"SchemaName":"cyg_FinanceTeamId","Value":"REPLACE_WITH_TEAM_ID"},
+    {"SchemaName":"cyg_FinanceChannelId","Value":"REPLACE_WITH_CHANNEL_ID"},
+    {"SchemaName":"cyg_MinimumConfidence","Value":"0.80"},
+    {"SchemaName":"cyg_AutoApprovalLimit","Value":"500"},
+    {"SchemaName":"cyg_ManagerApprovalLimit","Value":"5000"}
+  ],
+  "ConnectionReferences": []
+}

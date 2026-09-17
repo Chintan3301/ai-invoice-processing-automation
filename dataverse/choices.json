@@ -1,0 +1,15 @@
+{
+  "cyg_invoicestatus": {
+    "displayName": "Invoice Status",
+    "options": [
+      {"label":"New","value":100000000},
+      {"label":"Needs Review","value":100000001},
+      {"label":"Pending Approval","value":100000002},
+      {"label":"Approved","value":100000003},
+      {"label":"Rejected","value":100000004},
+      {"label":"Duplicate","value":100000005},
+      {"label":"Extraction Failed","value":100000006},
+      {"label":"Ready for Validation","value":100000007}
+    ]
+  }
+}

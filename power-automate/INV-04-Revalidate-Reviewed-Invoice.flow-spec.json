@@ -1,0 +1,21 @@
+{
+  "name": "INV-04 - Revalidate Reviewed Invoice",
+  "type": "Automated cloud flow",
+  "purpose": "Revalidate a human-corrected invoice after Power Apps marks it Ready for Validation, then apply duplicate checking and the same approval thresholds server-side.",
+  "trigger": {"connector":"Microsoft Dataverse","action":"When a row is added, modified or deleted","changeType":"Modified","table":"Invoices","selectColumns":"cyg_status,cyg_invoicenumber,cyg_suppliername,cyg_invoicetotal,cyg_manuallyreviewed","filterRows":"cyg_status eq 100000007"},
+  "actions": [
+    {"order":1,"name":"Get Invoice row","connector":"Microsoft Dataverse","action":"Get a row by ID"},
+    {"order":2,"name":"Validate reviewed required fields","type":"Condition","notes":"Require Invoice Number, Supplier Name and Invoice Total. Require cyg_manuallyreviewed = true. Human review replaces the AI confidence gate for this reprocessing path."},
+    {"order":3,"name":"Invalid reviewed data","type":"Scope","notes":"If validation fails, set Needs Review with an explanation and terminate."},
+    {"order":4,"name":"Compose Duplicate Key","type":"Compose","expression":"concat(toLower(trim(<SupplierName>)),'|',toLower(trim(<InvoiceNumber>)))"},
+    {"order":5,"name":"List other matching invoices","connector":"Microsoft Dataverse","action":"List rows","notes":"Filter by escaped duplicate key and exclude the current invoice row ID. Top Count 1."},
+    {"order":6,"name":"Duplicate branch","type":"Condition","notes":"If another row matches, set status Duplicate, save the reason, notify Finance and stop."},
+    {"order":7,"name":"Persist duplicate key","connector":"Microsoft Dataverse","action":"Update a row","notes":"Write cyg_duplicatekey before routing. Alternate key protects against a concurrent duplicate."},
+    {"order":8,"name":"Route by amount","type":"Condition","notes":"<= auto limit: Approved; > auto and <= manager limit: manager approval; > manager limit: manager then finance approval."},
+    {"order":9,"name":"Manager approval","connector":"Approvals","action":"Start and wait for an approval","notes":"Persist outcome/comments and set Approved or Rejected for the manager-only route."},
+    {"order":10,"name":"High-value manager approval","connector":"Approvals","action":"Start and wait for an approval"},
+    {"order":11,"name":"High-value finance approval","connector":"Approvals","action":"Start and wait for an approval","notes":"Run only after manager approval."},
+    {"order":12,"name":"Notify","connector":"Microsoft Teams / Office 365 Outlook","notes":"Send the final or exception status."}
+  ],
+  "loopPrevention": "The trigger only reacts when status is Ready for Validation. The flow immediately changes status to Needs Review, Pending Approval, Approved, Rejected or Duplicate, so its own updates do not re-enter the routing logic."
+}

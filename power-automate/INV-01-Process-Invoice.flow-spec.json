@@ -1,0 +1,33 @@
+{
+  "name": "INV-01 - Process Invoice",
+  "type": "Automated cloud flow",
+  "purpose": "Process PDF invoices uploaded to SharePoint, extract data with AI Builder, validate confidence, prevent duplicates, persist to Dataverse, route approvals, and notify users.",
+  "trigger": {
+    "connector": "SharePoint",
+    "action": "When a file is created (properties only)",
+    "folder": "/Invoices/Incoming",
+    "triggerCondition": "@endsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), '.pdf')"
+  },
+  "actions": [
+    {"order":1,"name":"Get file content","connector":"SharePoint","action":"Get file content","notes":"Use Identifier from trigger."},
+    {"order":2,"name":"Extract invoice","connector":"AI Builder","action":"Process invoices","notes":"Pass SharePoint file content. Capture Invoice ID, Vendor Name, Purchase Order, dates, Subtotal, Total Tax, Invoice Total, Amount Due and required confidence scores."},
+    {"order":3,"name":"Compose Record Name","type":"Compose","expression":"concat('Invoice - ', guid())","notes":"Stable Dataverse primary-name value even when extraction is incomplete."},
+    {"order":4,"name":"Condition - required extraction trustworthy","type":"Condition","notes":"Require non-empty Invoice ID and Vendor Name, non-null Invoice Total, and confidence >= cyg_MinimumConfidence for all three required fields."},
+    {"order":5,"name":"Needs Review - create row","connector":"Microsoft Dataverse","action":"Add a new row","branch":"if extraction validation is false","notes":"Store nullable extracted fields, confidence values, source metadata, blank Duplicate Key, status Needs Review and a clear review reason. Then notify Finance and terminate this branch."},
+    {"order":6,"name":"Compose Duplicate Key","type":"Compose","branch":"if extraction validation is true","expression":"concat(toLower(trim(<AI Builder Vendor Name>)),'|',toLower(trim(<AI Builder Invoice ID>)))"},
+    {"order":7,"name":"List matching invoices","connector":"Microsoft Dataverse","action":"List rows","notes":"Filter cyg_duplicatekey by the safely escaped duplicate key; Top Count 1."},
+    {"order":8,"name":"Condition - duplicate exists","type":"Condition","expression":"@greater(length(outputs('List_matching_invoices')?['body/value']),0)","ifYes":"Notify submitter/Finance that the invoice already exists and terminate without inserting another normal invoice row.","ifNo":"Create the invoice row and continue."},
+    {"order":9,"name":"Create Invoice row","connector":"Microsoft Dataverse","action":"Add a new row","notes":"Write the stable Record Name, extracted values, confidence values, source file metadata, duplicate key and status New. The alternate key is the final concurrency safeguard."},
+    {"order":10,"name":"Auto approval branch","type":"Condition","expression":"@lessOrEquals(float(<InvoiceTotalNumber>),float(<cyg_AutoApprovalLimit>))","notes":"Set status Approved and approved-on timestamp."},
+    {"order":11,"name":"Manager approval branch","connector":"Approvals","action":"Start and wait for an approval","notes":"For total > auto limit and <= manager limit, assign cyg_ManagerApproverEmail. On approve set Approved; on reject set Rejected and persist comments."},
+    {"order":12,"name":"High-value manager approval","connector":"Approvals","action":"Start and wait for an approval","notes":"For total > manager limit, manager must approve first."},
+    {"order":13,"name":"High-value finance approval","connector":"Approvals","action":"Start and wait for an approval","notes":"Run only after manager approval. Assign cyg_FinanceApproverEmail."},
+    {"order":14,"name":"Notify Teams","connector":"Microsoft Teams","action":"Post message in a chat or channel","notes":"Post final or exception status to the configured Finance team/channel."},
+    {"order":15,"name":"Notify submitter","connector":"Office 365 Outlook","action":"Send an email (V2)","notes":"Send invoice number, supplier, amount, status and source link."}
+  ],
+  "errorHandling": {
+    "pattern": "Wrap processing in TRY scopes and a CATCH scope configured for failure/timeout. If a Dataverse row exists, update cyg_processingerror; always notify Finance.",
+    "concurrency": "Keep the Dataverse alternate key on cyg_duplicatekey. If two identical valid invoices race after the pre-check, the second insert fails and is handled as a duplicate/concurrency exception rather than creating two records.",
+    "sensitiveData": "Enable Secure Inputs/Outputs on the AI Builder action and any action containing invoice content when required by the organisation."
+  }
+}

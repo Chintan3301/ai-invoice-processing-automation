@@ -1,0 +1,6 @@
+utterance,expected_tool
+"What is the status of invoice INV-1004?",Get Invoice Status
+"Can you check INV-3001 for me?",Get Invoice Status
+"Show me invoices that need manual review",List Review Queue
+"What is waiting for finance review?",List Review Queue
+"Pay invoice INV-1004",No action - explain payment is outside scope

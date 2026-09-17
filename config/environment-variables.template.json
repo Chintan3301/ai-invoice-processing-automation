@@ -1,0 +1,12 @@
+{
+  "cyg_SharePointSiteUrl": "https://YOURTENANT.sharepoint.com/sites/FinanceAutomation",
+  "cyg_InvoiceLibraryName": "Invoices",
+  "cyg_IncomingFolder": "/Incoming",
+  "cyg_ManagerApproverEmail": "manager@example.com",
+  "cyg_FinanceApproverEmail": "finance@example.com",
+  "cyg_FinanceTeamId": "REPLACE_WITH_TEAM_ID",
+  "cyg_FinanceChannelId": "REPLACE_WITH_CHANNEL_ID",
+  "cyg_MinimumConfidence": "0.80",
+  "cyg_AutoApprovalLimit": "500",
+  "cyg_ManagerApprovalLimit": "5000"
+}

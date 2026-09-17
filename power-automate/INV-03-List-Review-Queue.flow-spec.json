@@ -1,0 +1,11 @@
+{
+  "name": "INV-03 - List Review Queue",
+  "type": "Agent flow / solution cloud flow",
+  "purpose": "Return a small review queue to the Copilot Studio agent for finance users.",
+  "trigger": {"connector":"Copilot Studio","action":"When an agent calls the flow","inputs":[{"name":"maxItems","type":"number","required":false,"default":5}]},
+  "actions": [
+    {"order":1,"name":"List review rows","connector":"Microsoft Dataverse","action":"List rows","notes":"Filter status = Needs Review, order by Created On ascending, Top Count = min(maxItems, 10)."},
+    {"order":2,"name":"Select safe fields","type":"Select","notes":"Return invoice number, supplier, total, review reason and source URL only."},
+    {"order":3,"name":"Respond to the agent","connector":"Copilot Studio","action":"Respond to the agent","notes":"Asynchronous response Off; return compact JSON/text."}
+  ]
+}

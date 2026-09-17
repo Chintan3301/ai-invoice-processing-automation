@@ -1,0 +1,12 @@
+{
+  "name": "INV-02 - Get Invoice Status",
+  "type": "Agent flow / solution cloud flow",
+  "purpose": "Allow Copilot Studio to retrieve invoice status by invoice number without exposing unrelated records.",
+  "trigger": {"connector":"Copilot Studio","action":"When an agent calls the flow","inputs":[{"name":"invoiceNumber","type":"text","required":true}]},
+  "actions": [
+    {"order":1,"name":"Normalize input","type":"Compose","expression":"@trim(triggerBody()?['invoiceNumber'])"},
+    {"order":2,"name":"List rows","connector":"Microsoft Dataverse","action":"List rows","notes":"Escape single quotes in the normalized input, then filter cyg_invoicenumber with OData; select only invoice number, supplier, total, status, review reason, approval comments and source URL; Top Count 5."},
+    {"order":3,"name":"Build response","type":"Compose","notes":"If zero matches return found=false. If one or more matches, return found=true and a compact status summary."},
+    {"order":4,"name":"Respond to the agent","connector":"Copilot Studio","action":"Respond to the agent","notes":"Asynchronous response must be Off. Keep runtime comfortably under the 100-second agent action limit."}
+  ]
+}

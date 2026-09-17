@@ -1,0 +1,20 @@
+{
+  "getInvoiceStatus": {
+    "input": {"invoiceNumber":"string"},
+    "output": {
+      "found":"boolean",
+      "invoiceNumber":"string|null",
+      "supplier":"string|null",
+      "total":"number|null",
+      "currency":"string|null",
+      "status":"string|null",
+      "reviewReason":"string|null",
+      "approvalComments":"string|null",
+      "sourceUrl":"string|null"
+    }
+  },
+  "listReviewQueue": {
+    "input": {"maxItems":"integer <= 10"},
+    "output": {"items":"array of compact invoice review summaries"}
+  }
+}

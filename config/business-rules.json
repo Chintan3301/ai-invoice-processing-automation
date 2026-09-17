@@ -1,0 +1,13 @@
+{
+  "currency": "GBP",
+  "minimum_required_confidence": 0.80,
+  "auto_approval_limit": 500.00,
+  "manager_approval_limit": 5000.00,
+  "required_fields": ["invoice_number", "supplier_name", "invoice_total"],
+  "duplicate_key_fields": ["supplier_name", "invoice_number"],
+  "approval_policy": {
+    "at_or_below_auto_approval_limit": "auto_approve",
+    "above_auto_and_at_or_below_manager_limit": "manager_approval",
+    "above_manager_limit": "manager_then_finance_approval"
+  }
+}

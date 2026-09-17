@@ -1,0 +1,76 @@
+// APP OnStart
+Set(varStatusFilter, 'Invoice Status'.'Needs Review');
+Refresh(Invoices);
+
+// REVIEW QUEUE gallery Items
+SortByColumns(
+    Filter(
+        Invoices,
+        Status = 'Invoice Status'.'Needs Review' || Status = 'Invoice Status'.'Pending Approval'
+    ),
+    "createdon",
+    SortOrder.Ascending
+)
+
+// SEARCH gallery Items (optional replacement)
+SortByColumns(
+    Filter(
+        Invoices,
+        (IsBlank(txtSearch.Text) || StartsWith('Invoice Number', txtSearch.Text) || StartsWith('Supplier Name', txtSearch.Text)) &&
+        (IsBlank(varStatusFilter) || Status = varStatusFilter)
+    ),
+    "createdon",
+    SortOrder.Descending
+)
+
+// EDIT button OnSelect
+EditForm(frmInvoice);
+
+// SAVE button OnSelect
+SubmitForm(frmInvoice);
+
+// FORM OnSuccess
+Notify("Invoice saved.", NotificationType.Success);
+Refresh(Invoices);
+
+// MARK READY button OnSelect
+// Do not set Pending Approval directly. Persist the user's corrections and mark
+// the record Ready for Validation so INV-04 performs duplicate checks and routing.
+If(
+    IsBlank(frmInvoice.Updates.'Invoice Number') ||
+    IsBlank(frmInvoice.Updates.'Supplier Name') ||
+    IsBlank(frmInvoice.Updates.'Invoice Total'),
+    Notify("Invoice number, supplier and total are required.", NotificationType.Error),
+    Patch(
+        Invoices,
+        galInvoices.Selected,
+        frmInvoice.Updates,
+        {
+            Status: 'Invoice Status'.'Ready for Validation',
+            'Review Reason': Blank(),
+            'Manually Reviewed': true,
+            'Reviewed By': User().Email,
+            'Reviewed On': Now()
+        }
+    );
+    Notify("Invoice sent for server-side validation and approval routing.", NotificationType.Success);
+    Refresh(Invoices)
+)
+
+// REJECT button OnSelect
+Patch(
+    Invoices,
+    galInvoices.Selected,
+    {
+        Status: 'Invoice Status'.Rejected,
+        'Approval Comments': txtReviewComment.Text,
+        'Manually Reviewed': true,
+        'Reviewed By': User().Email,
+        'Reviewed On': Now()
+    }
+);
+Notify("Invoice rejected.", NotificationType.Success);
+Refresh(Invoices);
+
+// OPEN SOURCE button OnSelect
+If(!IsBlank(galInvoices.Selected.'Source URL'), Launch(galInvoices.Selected.'Source URL'))
