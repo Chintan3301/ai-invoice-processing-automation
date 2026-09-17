@@ -1,6 +1,6 @@
  AI Invoice Processing & Approval Automation
 
-A graduate-level Microsoft Power Platform portfolio project for processing PDF invoices with AI-assisted extraction, Dataverse validation, approval routing, manual review and conversational status lookup.
+Microsoft Power Platform project for processing PDF invoices with AI-assisted extraction, Dataverse validation, approval routing, manual review and conversational status lookup.
 
 > Important: The repository contains a complete implementation specification, test harness and ALM scaffolding. Genuine Power Apps / Power Automate / Copilot solution artifacts must be created and exported from your own Power Platform developer environment because connection references, AI Builder bindings and tenant identities are environment-specific. The repo deliberately does not include fake hand-written `.msapp` files or a fabricated "importable" solution zip.
 
